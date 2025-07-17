@@ -6,7 +6,7 @@ from io import BytesIO
 
 # Import our project modules
 from src import config
-from src.llm import get_outfit_recommendation, format_instruction_for_llm # Assuming we rename the function
+from src.llm import get_outfit_recommendation, format_instruction 
 from src.retriever import search_for_products
 
 # --- Globals and Initializations ---
