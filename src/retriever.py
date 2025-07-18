@@ -1,12 +1,14 @@
 import os
 import pandas as pd
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
+from chromadb.config import Settings
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from src import config
 from PIL import Image
 import requests
 from io import BytesIO
 
+# (The image helper functions like get_image_by_url, etc., remain the same. No changes needed there.)
 # --- Image helper functions from your notebook ---
 def get_image_by_url(url: str) -> Image.Image:
     """Downloads an image from a URL and returns a PIL Image object."""
@@ -49,28 +51,59 @@ def concat_images_v(images: list[Image.Image]) -> Image.Image:
     return new_im
 
 
-# --- Database Core Functions ---
+def _build_and_persist_db(embedding_function):
+    """Private helper to build the DB from scratch."""
+    print("Database not found. Creating and persisting a new one...")
+    
+    if not os.path.exists(config.DATA_PATH):
+        raise FileNotFoundError(f"Data file not found at {config.DATA_PATH}. Please upload it.")
 
-def create_or_load_database():
+    df = pd.read_csv(config.DATA_PATH)
+    
+    print(f"Processing {len(df)} rows from the dataset...")
+    docs, m_data = [], []
+    for index, row in df.iterrows():
+        # Ensure all data is a string to prevent errors
+        docs.append(f"For {row['gender']} - {row['name']} - {row.get('description', '')}")
+        m_data.append({
+            "index_in_db": index,
+            "images": str(row.get('images', '')),
+            "price": float(row['price']), # Ensure price is a number
+            "name": str(row['name'])
+        })
+
+    db = Chroma.from_texts(
+        texts=docs,
+        metadatas=m_data,
+        embedding=embedding_function,
+        persist_directory=config.DB_PERSIST_DIRECTORY,
+    )
+    print("Database created and saved successfully.")
+    return db
+
+# In src/retriever.py
+
+def load_database():
+    """
+    Loads the ChromaDB vector database from disk. Assumes it has already been built.
+    """
+    if not os.path.exists(config.DB_PERSIST_DIRECTORY):
+        raise FileNotFoundError(
+            f"Database not found at {config.DB_PERSIST_DIRECTORY}. "
+            "Please run 'python build_database.py' first to create it."
+        )
+    
+    print("Loading existing vector database from disk...")
     embedding_function = HuggingFaceEmbeddings(model_name=config.EMBEDDING_MODEL_NAME)
-    if os.path.exists(config.DB_PERSIST_DIRECTORY) and os.listdir(config.DB_PERSIST_DIRECTORY):
-        print("Loading existing vector database from disk...")
-        db = Chroma(persist_directory=config.DB_PERSIST_DIRECTORY, embedding_function=embedding_function)
-    else:
-        print("Database not found. Creating and persisting a new one...")
-        if not os.path.exists(config.DATA_PATH):
-            raise FileNotFoundError(f"Data file not found at {config.DATA_PATH}. Please upload it.")
-        df = pd.read_csv(config.DATA_PATH)
-        docs, m_data = [], []
-        for index, row in df.iterrows():
-            docs.append(f"For {row['gender']} - {row['name']} - {row['description']}")
-            m_data.append({"index_in_db": index, "images": str(row['images']), "price": row['price'], "name": row['name']})
-        db = Chroma.from_texts(texts=docs, metadatas=m_data, embedding=embedding_function, persist_directory=config.DB_PERSIST_DIRECTORY)
+    db = Chroma(
+        persist_directory=config.DB_PERSIST_DIRECTORY, 
+        embedding_function=embedding_function
+    )
     print("Database is ready.")
     return db
-    
 
-# --- Main Search Function ---
+
+
 def search_for_products(prompt: str, db: Chroma):
     """
     Takes a user prompt and a database instance, searches for relevant products,
