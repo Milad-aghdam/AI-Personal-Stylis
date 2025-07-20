@@ -104,13 +104,15 @@ def load_database():
 
 
 
-def search_for_products(prompt: str, db: Chroma):
+def search_for_products(prompt: str, gender_filter: str, db: Chroma):
     """
     Takes a user prompt and a database instance, searches for relevant products,
     and returns a composite image and a formatted text description.
     """
-    print(f"Searching database for: '{prompt}'")
-    documents = db.similarity_search(prompt, k=3)
+    print(f"Searching for '{prompt}' with gender filter: '{gender_filter}'")
+    documents = db.similarity_search(prompt,
+                                    k=3,
+                                    filter={"gender": gender_filter})
 
     if not documents:
         print("No relevant documents found.")

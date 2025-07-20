@@ -1,10 +1,10 @@
 # Python
 __pycache__/
 *.pyc
-venv/
+chatpot/
 
 # Secrets
-.env
+.env.example
 
 # IDE and OS files
 .idea/

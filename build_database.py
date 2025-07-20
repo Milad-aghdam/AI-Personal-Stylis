@@ -27,12 +27,18 @@ def build_database():
     print(f"Processing {len(df)} rows...")
     docs, metadatas = [], []
     for index, row in df.iterrows():
-        docs.append(f"For {row['gender']} - {row['name']} - {row.get('description', '')}")
+        document_text = (
+            f"Product Name: {row.get('name', '')}. "
+            f"Description: {row.get('description', '')}. "
+            f"Gender: {row.get('gender', '')}."
+        )
+        docs.append(document_text)
         metadatas.append({
             "index_in_db": index,
             "images": str(row.get('images', '')),
             "price": float(row['price']),
             "name": str(row['name']),
+            "gender": str(row['gender']),
 
         })
 
