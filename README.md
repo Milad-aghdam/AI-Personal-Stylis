@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-An intelligent Telegram bot that acts as a personal fashion advisor. This project leverages a Retrieval-Augmented Generation (RAG) pipeline, combining the power of a fine-tuned Large Language Model with a semantic vector search engine to provide personalized outfit recommendations and product discovery.
+An intelligent Telegram bot that acts as a personal fashion advisor. This project leverages a Retrieval-Augmented Generation (RAG) pipeline by integrating a pre-fine-tuned Large Language Model (neuralwork/mistral-7b-style-instruct) with a semantic vector search engine to provide personalized outfit recommendations.
 
 
 
