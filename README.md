@@ -95,14 +95,3 @@ The project is organized into a modular structure for maintainability:
     ├── 🧠 llm.py            # LLM loading and response generation
     └── 🔍 retriever.py      # Vector DB loading and product search logic
 ```
-
----
-
-## 💡 Future Improvements
-
-*   **CI/CD Pipeline:** Implement a GitHub Action to automatically build and test the Docker image on every push.
-*   **Webhook Architecture:** Refactor the bot to use webhooks with FastAPI for better efficiency and scalability instead of polling.
-*   **User Profile Persistence:** Save user-provided details (style, body type) to a database (like SQLite) for a personalized experience on future visits.
-*   **Multimodal Search:** Add the ability for users to upload an image of a clothing item to find matching products.
-
----
